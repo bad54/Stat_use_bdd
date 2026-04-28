@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Fournisseurs ────────────────────────────────────────────────────────────
+
+enum ProviderType {
+  API_SUSHI
+  FILE_IMPORT
+  MANUAL
+}
+
+model Provider {
+  id          String       @id @default(cuid())
+  name        String
+  code        String       @unique
+  type        ProviderType @default(FILE_IMPORT)
+  apiUrl      String?
+  isActive    Boolean      @default(true)
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  lastSyncAt  DateTime?
+
+  credentials   ProviderCredential[]
+  usageMetrics  UsageMetric[]
+  reportImports ReportImport[]
+  apiSyncLogs   ApiSyncLog[]
+  importMappings ImportMapping[]
+
+  @@map("providers")
+}
+
+model ProviderCredential {
+  id         String   @id @default(cuid())
+  providerId String
+  key        String
+  value      String
+  isSecret   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, key])
+  @@map("provider_credentials")
+}
+
+// ─── Imports ─────────────────────────────────────────────────────────────────
+
+enum ImportSource {
+  API
+  FILE
+  MANUAL
+}
+
+enum ImportStatus {
+  PENDING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model ReportImport {
+  id             String       @id @default(cuid())
+  providerId     String
+  reportType     String
+  source         ImportSource
+  sourceFileName String?
+  status         ImportStatus @default(PENDING)
+  rowsImported   Int          @default(0)
+  rowsTotal      Int          @default(0)
+  errorMessage   String?
+  errorDetails   Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  createdBy      String?
+
+  provider     Provider      @relation(fields: [providerId], references: [id])
+  usageMetrics UsageMetric[]
+
+  @@map("report_imports")
+}
+
+// ─── Données d'utilisation harmonisées ───────────────────────────────────────
+
+model UsageMetric {
+  id             String       @id @default(cuid())
+  providerId     String
+  importId       String?
+  platform       String
+  databaseName   String?
+  title          String?
+  reportType     String
+  metricType     String
+  year           Int
+  month          Int
+  period         String
+  consultations  Int          @default(0)
+  searches       Int?
+  downloads      Int?
+  source         ImportSource
+  sourceFileName String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  createdBy      String?
+  updatedBy      String?
+
+  provider Provider      @relation(fields: [providerId], references: [id])
+  import   ReportImport? @relation(fields: [importId], references: [id])
+
+  @@index([providerId, year, month])
+  @@index([period])
+  @@index([metricType])
+  @@index([platform])
+  @@map("usage_metrics")
+}
+
+// ─── Mapping de colonnes ──────────────────────────────────────────────────────
+
+model ImportMapping {
+  id           String   @id @default(cuid())
+  providerId   String
+  reportType   String
+  sourceColumn String
+  targetField  String
+  transform    String?
+  isRequired   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, reportType, sourceColumn])
+  @@map("import_mappings")
+}
+
+// ─── Logs de synchronisation API ─────────────────────────────────────────────
+
+model ApiSyncLog {
+  id           String       @id @default(cuid())
+  providerId   String
+  reportType   String
+  beginDate    String
+  endDate      String
+  status       ImportStatus
+  rowsFetched  Int          @default(0)
+  errorMessage String?
+  errorDetails Json?
+  requestUrl   String?
+  responseCode Int?
+  duration     Int?
+  createdAt    DateTime     @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id])
+
+  @@map("api_sync_logs")
+}
+
+// ─── Paramètres de l'application ─────────────────────────────────────────────
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("general")
+  label     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}
