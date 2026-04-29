@@ -60,7 +60,12 @@
               {{ formatDateShort(p.lastSyncAt) }}
             </td>
             <td>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <NuxtLink
+                  v-if="p.type === 'API_SUSHI'"
+                  :to="`/providers/${p.id}/api-config`"
+                  class="btn-secondary btn-sm text-xs"
+                >API</NuxtLink>
                 <NuxtLink :to="`/provider-analysis?provider=${p.id}`"
                   class="btn-secondary btn-sm text-xs">Analyser</NuxtLink>
                 <button class="btn-secondary btn-sm text-xs" @click="openEditModal(p)">Modifier</button>

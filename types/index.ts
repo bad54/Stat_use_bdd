@@ -166,6 +166,56 @@ export interface ApiSyncLog {
   provider?: Pick<Provider, 'id' | 'name' | 'code'>
 }
 
+// ─── API Config ───────────────────────────────────────────────────────────────
+
+export interface ProviderApiConfig {
+  id: string
+  providerId: string
+  apiType: string
+  counterVersion: string
+  baseUrl: string
+  fallbackUrl: string | null
+  endpoint: string | null
+  reportType: string
+  customerId: string | null
+  requestorId: string | null
+  hasApiKey: boolean
+  apiKeyMasked: string | null
+  hasToken: boolean
+  tokenMasked: string | null
+  headersJson: Record<string, string> | null
+  queryParamsJson: Record<string, string> | null
+  defaultBeginDate: string | null
+  defaultEndDate: string | null
+  mockMode: boolean
+  isActive: boolean
+  notes: string | null
+  lastTestAt: string | null
+  lastTestStatus: string | null
+  lastTestMessage: string | null
+  lastSyncAt: string | null
+  lastSyncStatus: string | null
+  lastSyncRows: number | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ApiSyncLogEntry {
+  id: string
+  providerId: string
+  reportType: string
+  beginDate: string
+  endDate: string
+  status: string
+  rowsFetched: number
+  errorMessage: string | null
+  requestUrl: string | null
+  responseCode: number | null
+  duration: number | null
+  isMock: boolean
+  createdAt: string
+}
+
 // ─── Paramètres ───────────────────────────────────────────────────────────────
 
 export interface AppSetting {

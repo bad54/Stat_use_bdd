@@ -32,6 +32,7 @@ model Provider {
   reportImports ReportImport[]
   apiSyncLogs   ApiSyncLog[]
   importMappings ImportMapping[]
+  apiConfig      ProviderApiConfig?
 
   @@map("providers")
 }
@@ -49,6 +50,51 @@ model ProviderCredential {
 
   @@unique([providerId, key])
   @@map("provider_credentials")
+}
+
+// ─── Configuration API par fournisseur ───────────────────────────────────────
+
+model ProviderApiConfig {
+  id               String   @id @default(cuid())
+  providerId       String   @unique
+  apiType          String   @default("SUSHI_R51")  // SUSHI_R5, SUSHI_R51, CUSTOM
+  counterVersion   String   @default("5.1")
+  baseUrl          String
+  fallbackUrl      String?
+  endpoint         String?
+  reportType       String   @default("DR")
+  customerId       String?
+  requestorId      String?
+
+  // Secrets stockés encodés (MVP: base64 — prévoir chiffrement en production)
+  apiKeyEncoded    String?
+  apiKeyMasked     String?  // ex: "****abcd"
+  tokenEncoded     String?
+  tokenMasked      String?  // ex: "****wxyz"
+
+  // Paramètres supplémentaires
+  headersJson      Json?    // { "X-Custom-Header": "value" }
+  queryParamsJson  Json?    // { "param": "value" }
+  defaultBeginDate String?  // YYYY-MM
+  defaultEndDate   String?  // YYYY-MM
+  mockMode         Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  notes            String?
+
+  // Suivi des tests et synchronisations
+  lastTestAt       DateTime?
+  lastTestStatus   String?   // SUCCESS, FAILED
+  lastTestMessage  String?
+  lastSyncAt       DateTime?
+  lastSyncStatus   String?
+  lastSyncRows     Int?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("provider_api_configs")
 }
 
 // ─── Imports ─────────────────────────────────────────────────────────────────
@@ -155,6 +201,7 @@ model ApiSyncLog {
   requestUrl   String?
   responseCode Int?
   duration     Int?
+  isMock       Boolean      @default(false)
   createdAt    DateTime     @default(now())
 
   provider Provider @relation(fields: [providerId], references: [id])

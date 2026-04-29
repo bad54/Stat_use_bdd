@@ -13,7 +13,8 @@
 - [x] Phase 9 : Tests Vitest
 - [x] Phase 10 : CI GitHub Actions + documentation
 - [x] Phase 11 : Validation build (npm install, tests, build)
-- [ ] Phase 12 : Commits Git + push GitHub
+- [x] Phase 12 : Configuration API par fournisseur (UI complète)
+- [ ] Phase 13 : Commits Git + push GitHub
 
 ---
 
@@ -94,6 +95,8 @@
 - [x] tests/unit/mapping.test.ts
 - [x] tests/unit/sushi.test.ts
 - [x] tests/unit/format.test.ts
+- [x] tests/unit/secrets.test.ts
+- [x] tests/unit/counter-parser.test.ts
 
 ### Phase 10 — CI + docs ✅
 - [x] .github/workflows/ci.yml
@@ -114,7 +117,7 @@
 | npx prisma generate | ✅ | Client généré |
 | npx prisma migrate dev | ✅ | Migration init appliquée |
 | npx prisma db seed | ✅ | 6 fournisseurs, 624 métriques créées |
-| npm test | ✅ | 42/42 tests passent (4 fichiers) |
+| npm test | ✅ | 60/60 tests passent (6 fichiers) |
 | npm run build | ✅ | Build complet, 8.05 MB |
 
 ---
